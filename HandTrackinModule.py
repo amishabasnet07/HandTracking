@@ -2,9 +2,6 @@ import cv2
 import mediapipe as mp
 import time
 
-from HandTrackingProject import handLms
-
-
 class handDetector():
     def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
         self.mode = mode
@@ -30,33 +27,33 @@ class handDetector():
                 if draw:
                     self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
         return img
-    def findPosition(self,img,handNo=0,draw=True):
-        lmlist =[]
+
+    def findPosition(self, img, handNo=0, draw=True):
+        lmlist = []
         if self.results.multi_hand_landmarks:
-            myHand =self.results.multi_hand_landmarks[handNo]
-        for id,lm in enumerate(handLms.landmark):
-            h,w,c=img.shape
-            cx,cy=int (lm.x*w),int(lm.y*h)
-           # print (id,cx,cy)
-            lmlist.append([id,cx,cy])
-            if draw:
-              cv2.circle(img,(cx,cy),15,(255,0,255),cv2.FILLED)
-              return lmlist
+            myHand = self.results.multi_hand_landmarks[handNo]
+            for id, lm in enumerate(myHand.landmark):
+                h, w, c = img.shape
+                cx, cy = int(lm.x * w), int(lm.y * h)
+                lmlist.append([id, cx, cy])
+                if draw:
+                    cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
+        return lmlist
+
 
 def main():
     pTime = 0
+    cTime=0
     cap = cv2.VideoCapture(0)
     detector = handDetector()
 
     while True:
         success, img = cap.read()
-
-
         img = detector.findHands(img)
         lmlist = detector.findPosition(img)
-        if len(lmlist) !=0:
-          print(lmlist[4])
 
+        if len(lmlist) != 0:
+            print(lmlist[4])
 
         cTime = time.time()
         fps = 1 / (cTime - pTime)
@@ -66,11 +63,7 @@ def main():
                     cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
 
         cv2.imshow("Hand Tracking", img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+        cv2.waitKey(1)
 
 
 if __name__ == "__main__":
